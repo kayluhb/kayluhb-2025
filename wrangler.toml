@@ -1,0 +1,14 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "kayluhb"
+
+main = "./server.ts"
+workers_dev = true
+# https://developers.cloudflare.com/workers/platform/compatibility-dates
+compatibility_date = "2025-02-14"
+
+[assets]
+# https://developers.cloudflare.com/workers/static-assets/binding/
+directory = "./build/client"
+
+[build]
+command = "pnpm run build"
