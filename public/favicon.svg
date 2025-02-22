@@ -1,3 +1,14 @@
+
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="200" height="200" fill="#6A5ACD"/>
+<title>favicon</title>
+  <style>
+    #t { fill: #6A5ACD }
+
+    @media (prefers-color-scheme: dark) {
+      #t { fill: #07c9fe }
+    }
+  </style>
+  <g id="t">
+    <rect width="200" height="200" />
+  </g>
 </svg>
