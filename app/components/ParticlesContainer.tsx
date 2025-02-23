@@ -30,7 +30,7 @@ const CONSTANTS = {
   LETTER_WIDTH: 40,
   MOUSE_RADIUS: 40,
   PULL_THRESHOLD: 100,
-  DAMPING_DISTANCE: 5, // New constant
+  DAMPING_DISTANCE: 5,
 } as const;
 
 const debounce = (func: Function, wait: number) => {
@@ -73,28 +73,28 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
     setParticles(initialParticles);
   }, []);
 
-  // const handleResize = useCallback(
-  //   debounce(() => {
-  //     if (!containerRef.current) return;
+  const handleResize = useCallback(
+    debounce(() => {
+      if (!containerRef.current) return;
 
-  //     const rect = containerRef.current.getBoundingClientRect();
-  //     const letterWidth = CONSTANTS.LETTER_WIDTH;
-  //     const letterGap = CONSTANTS.LETTER_GAP;
-  //     const wordWidth = word.length * letterWidth + (word.length - 1) * letterGap;
+      const rect = containerRef.current.getBoundingClientRect();
+      const letterWidth = CONSTANTS.LETTER_WIDTH;
+      const letterGap = CONSTANTS.LETTER_GAP;
+      const wordWidth = word.length * letterWidth + (word.length - 1) * letterGap;
 
-  //     const startX = (rect.width - wordWidth) / 2;
-  //     const centerY = rect.height / 2;
+      const startX = (rect.width - wordWidth) / 2;
+      const centerY = rect.height / 2;
 
-  //     setParticles((prevParticles) =>
-  //       prevParticles.map((particle, index) => ({
-  //         ...particle,
-  //         targetX: startX + index * (letterWidth + letterGap),
-  //         targetY: centerY,
-  //       })),
-  //     );
-  //   }, 100),
-  //   [word],
-  // );
+      setParticles((prevParticles) =>
+        prevParticles.map((particle, index) => ({
+          ...particle,
+          targetX: startX + index * (letterWidth + letterGap),
+          targetY: centerY,
+        })),
+      );
+    }, 100),
+    [word],
+  );
 
   const handleKeyboardNavigation = useCallback((e: React.KeyboardEvent) => {
     const step = CONSTANTS.KEYBOARD_STEP;
@@ -243,7 +243,7 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize);
 
     const handleMouseMove = (e: MouseEvent | Touch) => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -283,7 +283,7 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchstart', handleTouchStart);
-      // window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', handleResize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
