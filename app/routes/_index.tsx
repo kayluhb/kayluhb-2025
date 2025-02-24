@@ -5,6 +5,7 @@ import { ParticlesContainer } from '~/components/ParticlesContainer';
 import { PixelatedImage } from '~/components/PixelatedImage';
 import { Chevron } from '~/components/icons/Chevron';
 import { ImageUpload } from '~/components/icons/ImageUpload';
+import { XMark } from '~/components/icons/XMark'; // Add this import
 
 export const meta: MetaFunction = () => {
   return [
@@ -35,6 +36,10 @@ export default function Index() {
     }
   }, []);
 
+  const handleCancelImage = useCallback(() => {
+    setSelectedImage(null);
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.currentTarget.blur();
@@ -54,7 +59,7 @@ export default function Index() {
           className="inline-flex items-center text-sm text-gray-600 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
           href="/projects"
         >
-          Past Projects <Chevron className="ml-2 scale-x-[-1]" />
+          View Work <Chevron className="ml-2 scale-x-[-1]" />
         </a>
       </nav>
       <div className="absolute top-8 left-10 z-10 max-w-xs">
@@ -67,18 +72,29 @@ export default function Index() {
         <div className="sr-only">
           This is an interactive area where you can enter text to see particle animations or upload an image to display.
         </div>
-        <div className="fixed bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center justify-center gap-2 p-4 md:bottom-6">
+        <div className="fixed bottom-20 left-1/2 z-10 flex w-full -translate-x-1/2 items-center justify-center gap-2 p-4 md:bottom-6">
           <Input
             onChange={handleWordChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setIsInputFocused(true)}
             onBlur={() => setIsInputFocused(false)}
             value={word}
+            disabled={!!selectedImage} // Disable input if there's an image
           />
-          <label className="cursor-pointer rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600">
-            <ImageUpload />
-            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-          </label>
+          {selectedImage ? (
+            <button
+              onClick={handleCancelImage}
+              className="cursor-pointer rounded-md bg-red-500 p-2 text-white hover:bg-red-600"
+              aria-label="Remove image"
+            >
+              <XMark className="h-5 w-5" />
+            </button>
+          ) : (
+            <label className="cursor-pointer rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600">
+              <ImageUpload />
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            </label>
+          )}
         </div>
         {selectedImage ? (
           <div className="h-full w-full">

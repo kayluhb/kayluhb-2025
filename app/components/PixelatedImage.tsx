@@ -23,15 +23,14 @@ const MOUSE_FORCE = 2;
 // Memoized particle component
 const Particle = memo(({ color, x, y, size }: { color: string; x: number; y: number; size: number }) => (
   <div
-    className="absolute rounded-full"
+    className="absolute rounded-full transition-none will-change-transform"
     style={{
       backgroundColor: color,
-      height: `calc(${100 / size}% - 4px)`,
+      height: `calc(${100 / size}% - ${size > 30 ? 4 : 2}px)`, // Smaller gap for mobile
       left: `${x}%`,
       top: `${y}%`,
       transform: 'translate(-50%, -50%)',
-      width: `calc(${100 / size}% - 4px)`,
-      transition: 'none',
+      width: `calc(${100 / size}% - ${size > 30 ? 4 : 2}px)`,
     }}
     aria-hidden="true"
   />
@@ -41,14 +40,41 @@ Particle.displayName = 'Particle';
 
 export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps) => {
   const [particles, setParticles] = useState<ParticleType[]>([]);
-  const [aspectRatio, setAspectRatio] = useState(1);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>(null);
   const mouseRef = useRef({ x: 0, y: 0, moving: false });
+  const [worker, setWorker] = useState<Worker | null>(null);
+
+  // Add touch state
+  const touchActiveRef = useRef(false);
 
   useEffect(() => {
-    const worker = new Worker(new URL('../workers/imageProcessor.ts', import.meta.url));
+    let currentWorker: Worker | null = null;
+
+    const initWorker = async () => {
+      try {
+        // Dynamic import of the worker
+        const WorkerModule = await import('../workers/imageProcessor?worker');
+        currentWorker = new WorkerModule.default();
+        setWorker(currentWorker);
+      } catch (error) {
+        console.error('Failed to load worker:', error);
+      }
+    };
+
+    initWorker();
+
+    return () => {
+      if (currentWorker) {
+        currentWorker.terminate();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!worker || !imageUrl) return;
+
     const image = new Image();
 
     image.onload = () => {
@@ -56,9 +82,14 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      canvas.width = image.width;
-      canvas.height = image.height;
-      ctx.drawImage(image, 0, 0);
+      canvas.width = Math.min(image.width, image.height);
+      canvas.height = canvas.width;
+
+      // Center crop the image
+      const sourceX = (image.width - canvas.width) / 2;
+      const sourceY = (image.height - canvas.height) / 2;
+
+      ctx.drawImage(image, sourceX, sourceY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -71,6 +102,7 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
     };
 
     worker.onmessage = (e) => {
+      console.info('worker.onmessage', e);
       setParticles(e.data);
       worker.terminate();
     };
@@ -78,29 +110,44 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
     image.src = imageUrl;
 
     return () => worker.terminate();
-  }, [imageUrl, gridSize]);
+  }, [worker, imageUrl, gridSize]);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
       mouseRef.current = { x, y, moving: true };
     };
 
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       mouseRef.current.moving = false;
     };
 
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mouseleave', handleMouseLeave);
+    const handlePointerDown = () => {
+      touchActiveRef.current = true;
+      mouseRef.current.moving = true;
+    };
+
+    const handlePointerUp = () => {
+      touchActiveRef.current = false;
+      mouseRef.current.moving = false;
+    };
+
+    // Use pointer events instead of mouse events
+    container.addEventListener('pointermove', handlePointerMove, { passive: true });
+    container.addEventListener('pointerleave', handlePointerLeave);
+    container.addEventListener('pointerdown', handlePointerDown);
+    container.addEventListener('pointerup', handlePointerUp);
 
     return () => {
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('pointermove', handlePointerMove);
+      container.removeEventListener('pointerleave', handlePointerLeave);
+      container.removeEventListener('pointerdown', handlePointerDown);
+      container.removeEventListener('pointerup', handlePointerUp);
     };
   }, []);
 
@@ -113,7 +160,9 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance < FORCE_RADIUS) {
-        const force = (1 - distance / FORCE_RADIUS) * MOUSE_FORCE;
+        // Adjust force based on touch vs mouse
+        const forceMultiplier = touchActiveRef.current ? MOUSE_FORCE * 1.5 : MOUSE_FORCE;
+        const force = (1 - distance / FORCE_RADIUS) * forceMultiplier;
         vx -= (dx / distance) * force;
         vy -= (dy / distance) * force;
       }
@@ -162,19 +211,16 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
 
   return (
     <div
-      className="fixed inset-0 flex h-full w-full items-center justify-center"
+      className="fixed inset-0 flex h-full w-full touch-none items-center justify-center"
       role="region"
       aria-label="Interactive pixelated image"
     >
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       <div
         ref={containerRef}
-        className="relative h-full max-h-[600px] w-full max-w-[600px]"
-        style={{
-          aspectRatio: `${1 / aspectRatio}`,
-        }}
+        className="relative aspect-square h-full max-h-[300px] w-full max-w-[300px] md:max-h-[600px] md:max-w-[600px]"
         role="img"
-        aria-label="Pixelated interactive image that responds to mouse movement"
+        aria-label="Pixelated interactive image that responds to touch and mouse movement"
         tabIndex={0}
         onKeyDown={(e) => {
           // Add keyboard controls for interacting with the image

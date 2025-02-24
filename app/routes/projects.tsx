@@ -166,7 +166,7 @@ export default function Projects() {
           </NavLink>
         </nav>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <h1 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Past Projects</h1>
+          <h1 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">My Work</h1>
           <p className="mb-12 text-xl text-gray-600 dark:text-gray-400">
             Here's a look at some of the cool projects I've worked on over the years.
           </p>
