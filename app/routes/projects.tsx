@@ -156,13 +156,15 @@ export default function Projects() {
   return (
     <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <NavLink
-          className="group mb-12 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
-          to="/"
-        >
-          <Chevron className="mr-2 transform transition-transform group-hover:-translate-x-1" />
-          Back to Home
-        </NavLink>
+        <nav className="absolute top-8 right-10 z-10 flex flex-col items-end gap-2">
+          <NavLink
+            className="group mb-12 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
+            to="/"
+          >
+            <Chevron className="mr-2 transform transition-transform group-hover:-translate-x-1" />
+            Back to Home
+          </NavLink>
+        </nav>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <h1 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Past Projects</h1>
           <p className="mb-12 text-xl text-gray-600 dark:text-gray-400">

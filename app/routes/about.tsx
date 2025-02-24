@@ -9,14 +9,15 @@ export const meta: MetaFunction = () => {
 export default function About() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
-      <NavLink
-        className="group mb-12 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
-        to="/"
-      >
-        <Chevron className="mr-2 transform transition-transform group-hover:-translate-x-1" />
-        Back to Home
-      </NavLink>
-
+      <nav className="absolute top-8 right-10 z-10 flex flex-col items-end gap-2">
+        <NavLink
+          className="group mb-12 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
+          to="/"
+        >
+          <Chevron className="mr-2 transform transition-transform group-hover:-translate-x-1" />
+          Back to Home
+        </NavLink>
+      </nav>
       <div className="space-y-8">
         <header className="border-b border-gray-200 pb-8 dark:border-gray-700">
           <h1 className="mb-4 text-5xl font-bold tracking-tight">Hello</h1>
@@ -81,6 +82,7 @@ export default function About() {
               <ul className="space-y-2">
                 <li>Jest</li>
                 <li>React Testing Library</li>
+                <li>pytest</li>
               </ul>
             </div>
           </div>

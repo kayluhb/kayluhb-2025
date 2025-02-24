@@ -2,7 +2,9 @@ import { useCallback, useState } from 'react';
 import type { MetaFunction } from 'react-router';
 import { Input } from '~/components/Input';
 import { ParticlesContainer } from '~/components/ParticlesContainer';
+import { PixelatedImage } from '~/components/PixelatedImage';
 import { Chevron } from '~/components/icons/Chevron';
+import { ImageUpload } from '~/components/icons/ImageUpload';
 
 export const meta: MetaFunction = () => {
   return [
@@ -18,10 +20,19 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const [word, setWord] = useState('KAYLUHB');
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleWordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newWord = e.target.value.toUpperCase();
     setWord(newWord);
+  }, []);
+
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setSelectedImage(imageUrl);
+    }
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -54,18 +65,28 @@ export default function Index() {
       </div>
       <main className="fixed inset-0 h-[100dvh] w-[100dvw]">
         <div className="sr-only">
-          This is an interactive particle animation. Each letter of the text you enter will be displayed as a floating
-          particle that responds to mouse or touch input. Use arrow keys to move the interaction point when focused on
-          the animation area.
+          This is an interactive area where you can enter text to see particle animations or upload an image to display.
         </div>
-        <Input
-          onChange={handleWordChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setIsInputFocused(true)}
-          onBlur={() => setIsInputFocused(false)}
-          value={word}
-        />
-        <ParticlesContainer isInputFocused={isInputFocused} word={word} />
+        <div className="fixed bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center justify-center gap-2 p-4 md:bottom-6">
+          <Input
+            onChange={handleWordChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsInputFocused(true)}
+            onBlur={() => setIsInputFocused(false)}
+            value={word}
+          />
+          <label className="cursor-pointer rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600">
+            <ImageUpload />
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          </label>
+        </div>
+        {selectedImage ? (
+          <div className="h-full w-full">
+            <PixelatedImage imageUrl={selectedImage} />
+          </div>
+        ) : (
+          <ParticlesContainer isInputFocused={isInputFocused} word={word} />
+        )}
       </main>
     </>
   );
