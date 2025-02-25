@@ -156,9 +156,9 @@ export default function Projects() {
   return (
     <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <nav className="absolute top-8 right-10 z-10 flex flex-col items-end gap-2">
+        <nav className="absolute top-4 right-5 z-10 flex flex-col items-end gap-2 md:top-8 md:right-10">
           <NavLink
-            className="group mb-12 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
+            className="group mb-12 inline-flex items-center text-sm font-bold text-gray-600 transition-colors hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
             to="/"
           >
             <Chevron className="mr-2 transform transition-transform group-hover:-translate-x-1" />
