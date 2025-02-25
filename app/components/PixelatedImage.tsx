@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ImageParticle } from './ImageParticle';
 
 interface PixelatedImageProps {
   imageUrl: string;
@@ -19,24 +20,6 @@ const FORCE_RADIUS = 100;
 const SPRING_STRENGTH = 0.1;
 const DAMPING = 0.8;
 const MOUSE_FORCE = 2;
-
-// Memoized particle component
-const Particle = memo(({ color, x, y, size }: { color: string; x: number; y: number; size: number }) => (
-  <div
-    className="absolute rounded-full transition-none will-change-transform"
-    style={{
-      backgroundColor: color,
-      height: `calc(${100 / size}% - ${size > 30 ? 4 : 2}px)`, // Smaller gap for mobile
-      left: `${x}%`,
-      top: `${y}%`,
-      transform: 'translate(-50%, -50%)',
-      width: `calc(${100 / size}% - ${size > 30 ? 4 : 2}px)`,
-    }}
-    aria-hidden="true"
-  />
-));
-
-Particle.displayName = 'Particle';
 
 export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps) => {
   const [particles, setParticles] = useState<ParticleType[]>([]);
@@ -82,14 +65,12 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      canvas.width = Math.min(image.width, image.height);
-      canvas.height = canvas.width;
+      // Use original image dimensions
+      canvas.width = image.width;
+      canvas.height = image.height;
 
-      // Center crop the image
-      const sourceX = (image.width - canvas.width) / 2;
-      const sourceY = (image.height - canvas.height) / 2;
-
-      ctx.drawImage(image, sourceX, sourceY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+      // Draw the full image without cropping
+      ctx.drawImage(image, 0, 0, image.width, image.height);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -102,7 +83,6 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
     };
 
     worker.onmessage = (e) => {
-      console.info('worker.onmessage', e);
       setParticles(e.data);
       worker.terminate();
     };
@@ -218,7 +198,8 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       <div
         ref={containerRef}
-        className="relative aspect-square h-full max-h-[300px] w-full max-w-[300px] md:max-h-[600px] md:max-w-[600px]"
+        className="relative h-full max-h-[300px] w-full max-w-[300px] md:max-h-[600px] md:max-w-[600px]" // Remove aspect-square class
+        style={{ aspectRatio: 'auto' }} // Allow natural aspect ratio
         role="img"
         aria-label="Pixelated interactive image that responds to touch and mouse movement"
         tabIndex={0}
@@ -231,7 +212,7 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
         }}
       >
         {particles.map((particle, index) => (
-          <Particle key={index} color={particle.color} x={particle.x} y={particle.y} size={gridSize} />
+          <ImageParticle key={index} color={particle.color} x={particle.x} y={particle.y} size={gridSize} />
         ))}
       </div>
     </div>

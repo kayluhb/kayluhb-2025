@@ -11,25 +11,19 @@ interface Particle {
   targetY: number;
 }
 
-interface TouchPosition {
-  startY: number;
-  currentY: number;
-}
-
 type ParticlesContainerProps = {
   isInputFocused: boolean;
   word: string;
 };
 
 const CONSTANTS = {
-  CENTER_FORCE: 0.03, // Reduced from 0.05
-  FRICTION: 0.97, // Increased from 0.95
+  CENTER_FORCE: 0.03,
+  FRICTION: 0.97,
   INITIAL_VELOCITY_RANGE: 4,
   KEYBOARD_STEP: 20,
   LETTER_GAP: 4,
   LETTER_WIDTH: 40,
   MOUSE_RADIUS: 40,
-  PULL_THRESHOLD: 100,
   DAMPING_DISTANCE: 5,
 } as const;
 
@@ -48,9 +42,6 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const animationFrameRef = useRef<number>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [touchPos, setTouchPos] = useState<TouchPosition | null>(null);
-  const pullThreshold = CONSTANTS.PULL_THRESHOLD;
 
   const initializeParticles = useCallback((newWord: string) => {
     if (!containerRef.current) return;
@@ -113,50 +104,6 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
         break;
     }
   }, []);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (window.scrollY === 0) {
-      setTouchPos({
-        startY: touch.clientY,
-        currentY: touch.clientY,
-      });
-    }
-  }, []);
-
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!touchPos) return;
-
-      const touch = e.touches[0];
-      setTouchPos((prev) => ({
-        ...prev!,
-        currentY: touch.clientY,
-      }));
-
-      const pullDistance = touch.clientY - touchPos.startY;
-      if (pullDistance > 0 && window.scrollY === 0) {
-        e.preventDefault();
-        containerRef.current!.style.transform = `translateY(${Math.min(pullDistance * 0.5, pullThreshold)}px)`;
-      }
-    },
-    [touchPos, pullThreshold],
-  );
-
-  const handleTouchEnd = useCallback(async () => {
-    if (!touchPos) return;
-
-    const pullDistance = touchPos.currentY - touchPos.startY;
-    if (pullDistance > pullThreshold) {
-      setIsRefreshing(true);
-      window.location.reload();
-      initializeParticles(word);
-      setIsRefreshing(false);
-    }
-
-    containerRef.current!.style.transform = 'translateY(0)';
-    setTouchPos(null);
-  }, [touchPos, pullThreshold, initializeParticles, word]);
 
   const animate = useCallback(() => {
     if (!containerRef.current) return;
@@ -243,46 +190,21 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
   useEffect(() => {
     if (!containerRef.current) return;
 
-    window.addEventListener('resize', handleResize);
-
-    const handleMouseMove = (e: MouseEvent | Touch) => {
+    const handlePointerMove = (e: PointerEvent) => {
       const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const x = 'clientX' in e ? e.clientX : e.pageX;
-        const y = 'clientY' in e ? e.clientY : e.pageY;
+      if (rect && e.target instanceof HTMLElement && e.target.closest('[role="application"]')) {
         setMousePos({
-          x: x - rect.left,
-          y: y - rect.top,
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
         });
       }
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      const target = touch.target as HTMLElement;
-      if (target.closest('[role="application"]')) {
-        e.preventDefault();
-        handleMouseMove(touch);
-      }
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      const target = touch.target as HTMLElement;
-      if (target.closest('[role="application"]')) {
-        e.preventDefault();
-        handleMouseMove(touch);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -305,27 +227,17 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
   }, [animate]);
 
   return (
-    <>
-      {isRefreshing && (
-        <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-sm bg-gray-800 px-4 py-2 text-white">
-          Refreshing...
-        </div>
-      )}
-      <div
-        aria-label="Particle animation area"
-        className="relative h-[100dvh] w-full touch-none overflow-hidden"
-        onKeyDown={handleKeyboardNavigation}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        ref={containerRef}
-        role="application"
-        tabIndex={0}
-      >
-        {particles.map((particle, index) => (
-          <Particle key={`${particle.letter}-${index}`} x={particle.x} y={particle.y} letter={particle.letter} />
-        ))}
-      </div>
-    </>
+    <div
+      aria-label="Particle animation area"
+      className="relative h-[100dvh] w-full touch-none overflow-hidden"
+      onKeyDown={handleKeyboardNavigation}
+      ref={containerRef}
+      role="application"
+      tabIndex={0}
+    >
+      {particles.map((particle, index) => (
+        <Particle key={`${particle.letter}-${index}`} x={particle.x} y={particle.y} letter={particle.letter} />
+      ))}
+    </div>
   );
 });
