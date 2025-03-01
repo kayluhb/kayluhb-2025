@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Particle } from '~/components/Particle';
+import { usePageVisibility } from '~/utils/usePageVisibility';
 
 interface Particle {
   x: number;
@@ -42,6 +43,7 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const animationFrameRef = useRef<number>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isPageVisible = usePageVisibility();
 
   const initializeParticles = useCallback((newWord: string) => {
     if (!containerRef.current) return;
@@ -218,13 +220,21 @@ export const ParticlesContainer: React.FC<ParticlesContainerProps> = memo(({ isI
   }, [word, initializeParticles]);
 
   useEffect(() => {
+    if (!isPageVisible) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
     animate();
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [animate]);
+  }, [animate, isPageVisible]);
 
   return (
     <div

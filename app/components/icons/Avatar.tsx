@@ -9,48 +9,27 @@ export function Avatar({ className = 'h-8 w-8' }: { className?: string }) {
       aria-labelledby="avatarTitle avatarDesc"
     >
       <title id="avatarTitle">Developer Avatar</title>
-      <desc id="avatarDesc">
-        A modern cartoon avatar of a developer with styled brown hair and a friendly expression
-      </desc>
+      <desc id="avatarDesc">A cartoon avatar of a developer with brown hair and a friendly smile</desc>
 
-      {/* Background Circle */}
-      <circle
-        cx="20"
-        cy="20"
-        r="19.5"
-        className="stroke-gray-200 dark:stroke-gray-700"
-        strokeWidth="1"
-        fill="currentColor"
-      />
-
-      {/* Hair - More styled with a modern cut */}
+      <circle cx="20" cy="20" r="19.5" className="stroke-gray-700 dark:stroke-gray-300" fill="none" />
+      {/* Hair */}
+      <path d="M14 12C14 12 16 8 20 8C24 8 26 12 26 12V16C26 16 24 15 20 15C16 15 14 16 14 16V12Z" fill="#654321" />
+      {/* Face */}
+      <circle cx="20" cy="18" r="7" fill="#DEB887" />
+      {/* Smile */}
       <path
-        d="M13 14C13 10 16 7 20 7C24 7 27 10 27 14V18C27 18 24 17 20 17C16 17 13 18 13 18V14Z"
-        fill="#8B4513"
-        className="transition-colors"
-      />
-
-      {/* Face - Slightly larger and rounder */}
-      <circle cx="20" cy="19" r="8" fill="#F5D0A9" className="transition-colors" />
-
-      {/* Smile - Smoother curve */}
-      <path
-        d="M16.5 20C16.5 20 18 22.5 20 22.5C22 22.5 23.5 20 23.5 20"
-        className="stroke-gray-700 dark:stroke-gray-200"
+        d="M17 19C17 19 18 21 20 21C22 21 23 19 23 19"
+        className="stroke-gray-800 dark:stroke-gray-200"
         strokeWidth="1.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
-
-      {/* Eyes - Slightly larger and more expressive */}
-      <circle cx="17.5" cy="18" r="1.25" className="fill-gray-700 dark:fill-gray-200" />
-      <circle cx="22.5" cy="18" r="1.25" className="fill-gray-700 dark:fill-gray-200" />
-
-      {/* Neck - Smoother transition */}
-      <path d="M17 27C17 27 18.5 28 20 28C21.5 28 23 27 23 27V29H17V27Z" fill="#F5D0A9" className="transition-colors" />
-
-      {/* Shirt collar - Modern cut */}
-      <path d="M15 29H25L24 34H16L15 29Z" className="fill-blue-500 transition-colors dark:fill-blue-400" />
+      {/* Eyes */}
+      <circle cx="18" cy="17" r="1" className="fill-gray-800 dark:fill-gray-200" />
+      <circle cx="22" cy="17" r="1" className="fill-gray-800 dark:fill-gray-200" />
+      {/* Neck */}
+      <path d="M18 25H22V28H18V25Z" fill="#DEB887" />
+      {/* Shirt collar */}
+      <path d="M16 28H24V32H16V28Z" className="fill-gray-700 dark:fill-gray-300" />
     </svg>
   );
 }

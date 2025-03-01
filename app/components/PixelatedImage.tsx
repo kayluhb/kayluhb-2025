@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePageVisibility } from '~/utils/usePageVisibility';
 import { ImageParticle } from './ImageParticle';
 
 interface PixelatedImageProps {
@@ -23,6 +24,7 @@ const MOUSE_FORCE = 2;
 
 export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps) => {
   const [particles, setParticles] = useState<ParticleType[]>([]);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>(null);
@@ -31,6 +33,8 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
 
   // Add touch state
   const touchActiveRef = useRef(false);
+
+  const isPageVisible = usePageVisibility();
 
   useEffect(() => {
     let currentWorker: Worker | null = null;
@@ -61,6 +65,10 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
     const image = new Image();
 
     image.onload = () => {
+      // Calculate aspect ratio
+      const aspectRatio = image.width / image.height;
+      setImageAspectRatio(aspectRatio);
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -84,12 +92,15 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
 
     worker.onmessage = (e) => {
       setParticles(e.data);
-      worker.terminate();
     };
 
     image.src = imageUrl;
 
-    return () => worker.terminate();
+    return () => {
+      if (worker) {
+        worker.terminate();
+      }
+    };
   }, [worker, imageUrl, gridSize]);
 
   useEffect(() => {
@@ -166,6 +177,14 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
   }, []);
 
   useEffect(() => {
+    if (!isPageVisible) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
     const updateParticles = () => {
       setParticles((currentParticles) => {
         // Only update if mouse is moving or particles are not at rest
@@ -187,7 +206,7 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [updateParticlePosition]);
+  }, [isPageVisible, particles, updateParticlePosition]);
 
   return (
     <div
@@ -198,8 +217,12 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       <div
         ref={containerRef}
-        className="relative h-full max-h-[300px] w-full max-w-[300px] md:max-h-[600px] md:max-w-[600px]" // Remove aspect-square class
-        style={{ aspectRatio: 'auto' }} // Allow natural aspect ratio
+        className="relative w-full max-w-[800px] object-contain"
+        style={{
+          aspectRatio: imageAspectRatio ? `${imageAspectRatio}` : 'auto',
+          height: 'auto',
+          maxHeight: '90vh',
+        }}
         role="img"
         aria-label="Pixelated interactive image that responds to touch and mouse movement"
         tabIndex={0}
