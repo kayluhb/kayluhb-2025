@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, type LinksFunction } from 'react-router';
 
 import styles from './tailwind.css?url';
@@ -9,8 +10,13 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.classList.toggle('dark', isDarkMode);
+  }, []);
+
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,7 +25,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-gray-100 transition-colors duration-300 dark:bg-gray-900">
         {children}
         <footer
           className="fixed right-0 bottom-0 flex justify-center gap-6 bg-white/80 p-4 text-sm backdrop-blur-sm dark:bg-black/80"
@@ -30,7 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <a
                   href="https://github.com/kayluhb"
-                  className="inline-block text-gray-600 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
+                  className="inline-block text-gray-600 transition-colors duration-300 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit Caleb Brown's GitHub Profile (opens in new window)"
@@ -56,7 +62,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <a
                   href="https://linkedin.com/in/kayluhb"
-                  className="inline-block text-gray-600 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
+                  className="inline-block text-gray-600 transition-colors duration-300 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit Caleb Brown's LinkedIn Profile (opens in new window)"
@@ -84,7 +90,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <a
                   href="https://instagram.com/kayluhb"
-                  className="inline-block text-gray-600 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
+                  className="inline-block text-gray-600 transition-colors duration-300 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-indigo-400"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit Caleb Brown's Instagram Profile (opens in new window)"

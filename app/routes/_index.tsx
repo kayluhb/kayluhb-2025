@@ -109,14 +109,14 @@ export default function Index() {
           {selectedImage ? (
             <button
               onClick={handleCancelImage}
-              className="cursor-pointer rounded-md bg-red-500 p-2 text-white hover:bg-red-600"
+              className="cursor-pointer rounded-md bg-red-500 p-2 text-white transition-all duration-300 hover:bg-red-600"
               aria-label="Remove image"
             >
               <XMark className="h-5 w-5" />
             </button>
           ) : (
             <label
-              className="cursor-pointer rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600"
+              className="cursor-pointer rounded-md bg-indigo-500 p-2 text-white transition-all duration-300 hover:bg-indigo-600"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
