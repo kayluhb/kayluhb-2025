@@ -217,11 +217,9 @@ export const PixelatedImage = ({ imageUrl, gridSize = 50 }: PixelatedImageProps)
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       <div
         ref={containerRef}
-        className="relative w-full max-w-[800px] object-contain"
+        className="relative h-auto max-h-[80vh] w-full max-w-[800px]"
         style={{
-          aspectRatio: imageAspectRatio ? `${imageAspectRatio}` : 'auto',
-          height: 'auto',
-          maxHeight: '90vh',
+          aspectRatio: imageAspectRatio ? imageAspectRatio : 'auto',
         }}
         role="img"
         aria-label="Pixelated interactive image that responds to touch and mouse movement"
