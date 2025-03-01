@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, type LinksFunction } from 'react-router';
 
 import styles from './tailwind.css?url';
@@ -10,11 +9,6 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.body.classList.toggle('dark', isDarkMode);
-  }, []);
-
   return (
     <html lang="en" className="h-full">
       <head>

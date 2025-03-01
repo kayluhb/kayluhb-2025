@@ -88,10 +88,15 @@ export default function Index() {
             </p>
           )}
         </div>
-        <p className="hidden max-w-xs text-sm text-gray-600 md:block dark:text-gray-400">
-          <span className="font-bold">Hi, I'm Caleb</span> — a full-stack engineer based in Austin, TX. I specialize in
-          building exceptional digital experiences.
-        </p>
+        <div className="hidden max-w-xs text-sm text-gray-600 md:block dark:text-gray-400">
+          <p className="flex items-center gap-4">
+            <Avatar />
+            <span>
+              <span className="font-bold">Hi, I'm Caleb</span> — a full-stack engineer based in Austin, TX. I specialize
+              in building exceptional digital experiences.
+            </span>
+          </p>
+        </div>
       </div>
       <main className="fixed inset-0 h-[100dvh] w-[100dvw]">
         <div className="sr-only">
